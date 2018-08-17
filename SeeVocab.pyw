@@ -4,7 +4,6 @@ from win10toast import ToastNotifier
 import time
 from datetime import datetime, timedelta
 
-time.sleep(30)
 
 
 today_date=datetime.today()
