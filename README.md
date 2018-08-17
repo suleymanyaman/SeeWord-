@@ -1,5 +1,5 @@
 # SeeWord-
-A desktop application to make the acquisition of vocabulary in language learning easier that works as a reminder. 
+A desktop application, working as a reminder, to make the acquisition of vocabulary in language learning easier. 
 
 
 The program works via a MySQL database. As a user, you add the target language words you encounter in different sources to the the database
