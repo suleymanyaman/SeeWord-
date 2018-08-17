@@ -35,5 +35,6 @@ while True:
     cursor.execute("INSERT INTO words VALUES (%s,%s,%s)", (word, meaning, sample_sentences[0]))
     os.system('cls') 
     db.commit()
+    sample_sentences.clear()
 
 
