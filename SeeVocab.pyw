@@ -4,15 +4,6 @@ from win10toast import ToastNotifier
 import time
 from datetime import datetime, timedelta
 
-
-
-today_date=datetime.today()
-today=datetime.today().strftime("%x")
-
-dead_line=today_date-timedelta(days=2)
-
-
-
 db = MySQLdb.connect(host="localhost", user="root", passwd="", db="spanish_vocabulary")
 
 cursor = db.cursor()
@@ -23,6 +14,21 @@ toaster=ToastNotifier()
 
 logs={}
 
+
+def process(d):
+    global date
+    y=int(d[6:]) # year
+    m=int(d[:2]) #month
+    d=int(d[3:5]) #day
+
+    formatted_date=date(y,m,d)
+
+    return formatted_date
+
+today =process(datetime.today().strftime("%m/%d/%Y"))
+
+
+
 while True:
 
     cursor2.execute("SELECT words.word, logs.date FROM words, logs WHERE words.id = word_id ")
@@ -30,12 +36,6 @@ while True:
     for log in log_data:
         logs[log[0]]=log[1]
 
-  
-
-    if dead_line.strftime("%x") in logs.values():
-        cursor2.execute("DELETE FROM logs")
-        db.commit()
-    
 
     cursor.execute("SELECT * FROM words")
     word_pair=choice((cursor.fetchall()))
@@ -49,11 +49,12 @@ while True:
         continue
 
 
+    cursor2.execute("SELECT * FROM logs LIMIT 1")
+    last_date = datetime.strptime(cursor2.fetchone()[1], "%Y-%m-%d").date()
+    delta = today - last_date
+    if delta.days >= 2:
+        cursor2.execute("DELETE FROM logs")
+        db.commit()
+
+
     time.sleep(900)
-
-
-
-
-
-
-
