@@ -6,4 +6,4 @@ The program works via a MySQL database. As a user, you add the target language w
 via add_item.py. This scripts adds the word, its meaning and an example sentence from spanishdict.com. The program, in certain time intervals
 like 15 minutes, sends you a Windows 10 notification, consisting of a random word, its meaning and the example sentence. 
 
-The updates to the projects wil follow soon. 
+The updates to the projects will follow soon. 
