@@ -2,7 +2,10 @@ import MySQLdb
 from random import choice
 from win10toast import ToastNotifier
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
+
+
+
 
 db = MySQLdb.connect(host="localhost", user="root", passwd="", db="spanish_vocabulary")
 
@@ -36,6 +39,14 @@ while True:
     for log in log_data:
         logs[log[0]]=log[1]
 
+    if len(logs)>1:
+        cursor2.execute("SELECT * FROM logs LIMIT 1")
+        last_date = datetime.strptime(cursor2.fetchone()[1], "%Y-%m-%d").date()
+        delta = today - last_date
+        if delta.days >= 2:
+            cursor2.execute("DELETE FROM logs")
+            db.commit()
+
 
     cursor.execute("SELECT * FROM words")
     word_pair=choice((cursor.fetchall()))
@@ -49,12 +60,8 @@ while True:
         continue
 
 
-    cursor2.execute("SELECT * FROM logs LIMIT 1")
-    last_date = datetime.strptime(cursor2.fetchone()[1], "%Y-%m-%d").date()
-    delta = today - last_date
-    if delta.days >= 2:
-        cursor2.execute("DELETE FROM logs")
-        db.commit()
-
 
     time.sleep(900)
+
+
+
