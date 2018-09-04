@@ -5,7 +5,7 @@ import time
 from datetime import datetime, timedelta, date
 
 
-
+time.sleep(30)
 
 db = MySQLdb.connect(host="localhost", user="root", passwd="", db="spanish_vocabulary")
 
@@ -28,12 +28,12 @@ def process(d):
 
     return formatted_date
 
-today =process(datetime.today().strftime("%m/%d/%Y"))
+
 
 
 
 while True:
-
+    today =process(datetime.today().strftime("%m/%d/%Y"))
     cursor2.execute("SELECT words.word, logs.date FROM words, logs WHERE words.id = word_id ")
     log_data=cursor2.fetchall()
     for log in log_data:
@@ -62,6 +62,8 @@ while True:
 
 
     time.sleep(900)
+
+
 
 
 
