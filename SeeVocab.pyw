@@ -31,16 +31,15 @@ def process(d):
 
 
 
-
 while True:
-    today =process(datetime.today().strftime("%m/%d/%Y"))
+    today = process(datetime.today().strftime("%m/%d/%Y"))
     cursor2.execute("SELECT words.word, logs.date FROM words, logs WHERE words.id = word_id ")
     log_data=cursor2.fetchall()
     for log in log_data:
         logs[log[0]]=log[1]
 
     if len(logs)>1:
-        cursor2.execute("SELECT * FROM logs LIMIT 1")
+        cursor2.execute("SELECT * FROM `logs` ORDER BY `logs`.`date` ASC")
         last_date = datetime.strptime(cursor2.fetchone()[1], "%Y-%m-%d").date()
         delta = today - last_date
         if delta.days >= 2:
@@ -62,7 +61,6 @@ while True:
 
 
     time.sleep(900)
-
 
 
 
