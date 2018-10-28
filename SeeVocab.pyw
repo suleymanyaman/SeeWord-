@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timedelta, date
 from threading import Thread
 
-
+root = Tk()
 
 db = MySQLdb.connect(host="localhost", user="root", passwd="", db="spanish_words")
 
@@ -63,12 +63,13 @@ def main_thread():
 
 
 
-        time.sleep(900)
+        time.sleep(dict[option_changed()])
 
 
 
 t1=Thread(target=main_thread)
-#t1.start()
+t1.start()
+
 
 ######### UI PART ###########
 
@@ -99,9 +100,11 @@ def add_word(event=None):
     cursor3.execute("INSERT INTO words VALUES (%s,%s,%s,%s)", ('NULL', word, meaning, sample_sentences[0]))
     db.commit()
     sample_sentences.clear()
+    entry_1.delete(0, END)
+    entry_2.delete(0,END)
 
 
-root = Tk()
+
 root.geometry('300x300')
 root.title("SeeWord")
 
@@ -134,7 +137,6 @@ entry_2.place(x=122,y=180)
 send_button=Button(root, text='Add',width=20,bg='brown',fg='white',command=add_word)
 send_button.pack()
 send_button.place(x=100,y=250)
-
 
 
 root.mainloop()
