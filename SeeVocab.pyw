@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import MySQLdb
 import requests
 from bs4 import BeautifulSoup
@@ -20,7 +21,6 @@ cursor2=db.cursor()
 toaster=ToastNotifier()
 
 logs={}
-
 
 
 def process(d):
@@ -54,7 +54,7 @@ def main_thread():
         word_pair=choice((cursor.fetchall()))
         word_choice = word_pair[1]+" : "+word_pair[2] + "\n\n"+word_pair[3]
         if word_pair[1] not in logs:
-            toaster.show_toast("Word of the Hour", word_choice,duration=20)
+            #toaster.show_toast("Word of the Hour", word_choice,duration=20)
             cursor2.execute("INSERT INTO logs VALUES(%s, %s)", (word_pair[0], today))
             db.commit()
 
@@ -63,7 +63,7 @@ def main_thread():
 
 
 
-        time.sleep(dict[option_changed()])
+        time.sleep(3600)
 
 
 
@@ -77,68 +77,106 @@ t1.start()
 cursor3 = db.cursor()
 
 
-
 pattern = re.compile(r'[^.!?]+[.!?]', re.MULTILINE | re.DOTALL)
 url = "http://www.spanishdict.com/translate/"
 
 
 
-def add_word(event=None):
-    word = entry_1.get()
-    meaning = entry_2.get()
-    sample_sentences = []
-    r = requests.get(url + word)
-    soup = BeautifulSoup(r.content, "html.parser")
+def view_the_words():
+    tk = Toplevel()
+    scrollbar = Scrollbar (tk)
+    word_list = Listbox(tk, height=30, width=30, yscrollcommand=scrollbar.set)
+    scrollbar.pack(side=RIGHT, fill=Y)
+    cursor.execute("SELECT * FROM words")
+    word_list.pack(side=LEFT, fill=BOTH)
+    rows = cursor.fetchall()
+    for row in rows:
+        word_list.insert(END, row[1]+":"+row[2])
 
-    for div in soup.find_all('div', {'class': 'dictionary-neodict-example'}):
-        for s in div:
-            s = s.text
-            result = pattern.match(s)
-            if result:
-                sample_sentences.append(s)
+def delete_frame():
+    tk=Toplevel()
+    tk.geometry("500x100")
+    note = Label(tk, text="Enter the word you want to delete.")
+    note.place(x=30, y=10)
+    word_deleted = Entry(tk)
+    word_deleted.pack()
+    word_deleted.place(x=30, y=45)
+    
+    def delete_word():
+        cursor.execute("DELETE FROM words WHERE word = '{}' ".format(word_deleted.get()))
+        db.commit()
+        messagebox._show("SeeWord", "The word you chose was deleted succesfully.")
 
-    cursor3.execute("INSERT INTO words VALUES (%s,%s,%s,%s)", ('NULL', word, meaning, sample_sentences[0]))
-    db.commit()
-    sample_sentences.clear()
-    entry_1.delete(0, END)
-    entry_2.delete(0,END)
+    delete_button = Button(tk, text="Delete", width=5, bg='brown', fg='white', command=delete_word)
+    delete_button.pack()
+    delete_button.place(x=170, y=45)
 
 
-
-root.geometry('300x300')
+root.geometry('400x400')
 root.title("SeeWord")
 
-label_0 = Label(root, text="SeeWord",width=20,font=("bold", 20))
+label_0 = Label(root, text="SeeWord\n Control Panel",width=20,font=("bold", 20))
 label_0.place(x=10,y=40)
 
+def add_word_frame():
+    tk = Toplevel()
+    label_1 = Label(tk, text="Word:",width=20,font=("bold", 10))
+    label_1.place(x=10,y=130)
 
-label_1 = Label(root, text="Word:",width=20,font=("bold", 10))
-label_1.place(x=10,y=130)
+    def add_word(event=None):
+        word = entry_1.get()
+        meaning = entry_2.get()
+        sample_sentences = []
+        r = requests.get(url + word)
+        soup = BeautifulSoup(r.content, "html.parser")
+
+        for div in soup.find_all('div', {'class': 'dictionary-neodict-example'}):
+            for s in div:
+                s = s.text
+                result = pattern.match(s)
+                if result:
+                    sample_sentences.append(s)
+
+        cursor3.execute("INSERT INTO words VALUES (%s,%s,%s,%s)", ('NULL', word, meaning, sample_sentences[0]))
+        db.commit()
+        sample_sentences.clear()
+        entry_1.delete(0, END)
+        entry_2.delete(0, END)
 
 
-entry_1 = Entry(root, textvariable=StringVar())
-entry_1.pack()
-entry_1.place(x=122, y=130)
+    entry_1 = Entry(tk, textvariable=StringVar())
+    entry_1.bind("<Return>", add_word)
+    entry_1.pack()
+    entry_1.place(x=122, y=130)
+
+
+    label_2 = Label(tk, text="Meaning:",width=20,font=("bold", 10))
+    label_2.place(x=10,y=180)
+
+
+    entry_2 = Entry(tk, textvariable=StringVar())
+    entry_2.bind("<Return>", add_word)
+    entry_2.pack()
+    entry_2.place(x=122,y=180)
+
+    add_button = Button(tk, text='Add a word', width=20, bg='brown', fg='white', command=add_word)
+    add_button.pack()
+    add_button.place(x=100, y=250)
 
 
 
-label_2 = Label(root, text="Meaning:",width=20,font=("bold", 10))
-label_2.place(x=10,y=180)
-
-
-
-entry_2 = Entry(root, textvariable=StringVar())
-entry_2.pack()
-entry_2.place(x=122,y=180)
-
-
-
-
-send_button=Button(root, text='Add',width=20,bg='brown',fg='white',command=add_word)
+send_button=Button(text='Add a word',width=20,bg='brown',fg='white',command=add_word_frame)
 send_button.pack()
-send_button.place(x=100,y=250)
+send_button.place(x=100,y=150)
+
+
+view_words=Button(root, text="View the words", width=20, bg='brown', fg='white', command=view_the_words)
+view_words.pack()
+view_words.place(x=100, y=200)
+
+delete_words=Button(root, text="Delete a word", width=20, bg='brown', fg='white', command=delete_frame)
+delete_words.pack()
+delete_words.place(x=100, y=250)
 
 
 root.mainloop()
-
-
