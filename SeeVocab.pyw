@@ -9,14 +9,28 @@ from win10toast import ToastNotifier
 import time
 from datetime import datetime, timedelta, date
 from threading import Thread
+import six 
 
 root = Tk()
+import tkinter
+import tempfile
 
-db = MySQLdb.connect(host="localhost", user="root", passwd="", db="spanish_words")
+ICON = (b'\x00\x00\x01\x00\x01\x00\x10\x10\x00\x00\x01\x00\x08\x00h\x05\x00\x00'
+    b'\x16\x00\x00\x00(\x00\x00\x00\x10\x00\x00\x00 \x00\x00\x00\x01\x00'
+    b'\x08\x00\x00\x00\x00\x00@\x05\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    b'\x00\x01\x00\x00\x00\x01') + b'\x00'*1282 + b'\xff'*64
+
+_, ICON_PATH = tempfile.mkstemp()
+with open(ICON_PATH, 'wb') as icon_file:
+    icon_file.write(ICON)
+
+root.iconbitmap(default="C:/Users/asus/Desktop/SeeWord/transparent.ico")
+
+db = MySQLdb.connect(host="45.63.101.196", user="suleyman_yaman", passwd="19971234", db="suleyman_seeword")
 
 cursor = db.cursor()
 
-cursor2=db.cursor()
+#cursor2=db.cursor()
 
 toaster=ToastNotifier()
 
@@ -35,6 +49,8 @@ def process(d):
 
 def main_thread():
     while True:
+        global db
+        cursor2 = db.cursor()
         today = process(datetime.today().strftime("%m/%d/%Y"))
         cursor2.execute("SELECT words.word, logs.date FROM words, logs WHERE words.id = word_id ")
         log_data=cursor2.fetchall()
@@ -54,7 +70,9 @@ def main_thread():
         word_pair=choice((cursor.fetchall()))
         word_choice = word_pair[1]+" : "+word_pair[2] + "\n\n"+word_pair[3]
         if word_pair[1] not in logs:
-            #toaster.show_toast("Word of the Hour", word_choice,duration=20)
+            toaster.show_toast("Word of the Hour", word_choice,duration=20)
+            db = MySQLdb.connect(host="45.63.101.196", user="suleyman_yaman", passwd="19971234", db="suleyman_seeword")
+            cursor2  = db.cursor()
             cursor2.execute("INSERT INTO logs VALUES(%s, %s)", (word_pair[0], today))
             db.commit()
 
@@ -87,6 +105,7 @@ def view_the_words():
     scrollbar = Scrollbar (tk)
     word_list = Listbox(tk, height=30, width=30, yscrollcommand=scrollbar.set)
     scrollbar.pack(side=RIGHT, fill=Y)
+    MySQLdb.connect(host="45.63.101.196", user="suleyman_yaman", passwd="19971234", db="suleyman_seeword")
     cursor.execute("SELECT * FROM words")
     word_list.pack(side=LEFT, fill=BOTH)
     rows = cursor.fetchall()
@@ -101,7 +120,7 @@ def delete_frame():
     word_deleted = Entry(tk)
     word_deleted.pack()
     word_deleted.place(x=30, y=45)
-    
+
     def delete_word():
         cursor.execute("DELETE FROM words WHERE word = '{}' ".format(word_deleted.get()))
         db.commit()
@@ -137,7 +156,10 @@ def add_word_frame():
                 if result:
                     sample_sentences.append(s)
 
-        cursor3.execute("INSERT INTO words VALUES (%s,%s,%s,%s)", ('NULL', word, meaning, sample_sentences[0]))
+
+        db = MySQLdb.connect(host="45.63.101.196", user="xxxxx", passwd="xxxxx", db="xxxxx")
+        cursor3 = db.cursor()
+        cursor3.execute("INSERT INTO words VALUES (%s,%s,%s,%s)", ("NULL", word, meaning, sample_sentences[0]))
         db.commit()
         sample_sentences.clear()
         entry_1.delete(0, END)
