@@ -26,7 +26,7 @@ with open(ICON_PATH, 'wb') as icon_file:
 
 root.iconbitmap(default="C:/Users/asus/Desktop/SeeWord/transparent.ico")
 
-db = MySQLdb.connect(host="45.63.101.196", user="suleyman_yaman", passwd="19971234", db="suleyman_seeword")
+db = MySQLdb.connect(host="45.63.101.196", user="xxxx", passwd="xxxx", db="xxxx")
 
 cursor = db.cursor()
 
